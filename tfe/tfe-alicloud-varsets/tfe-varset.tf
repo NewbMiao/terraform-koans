@@ -1,7 +1,16 @@
+data "tfe_project" "cloudplatform" {
+  name = "cloudplatform"
+}
+
+output "cloudplatform_project_id" {
+  description = "The ID of the cloudplatform project"
+  value       = data.tfe_project.cloudplatform.id
+}
+
 locals {
   tfe_project_ids = {
     cloudplatform = {
-      project_id    = "prj-ifPU81zqNih2NHxM"
+      project_id    = data.tfe_project.cloudplatform.id
       workspace_ids = []
     }
   }
@@ -55,3 +64,4 @@ resource "tfe_variable" "cloudplatform_ali_region" {
   variable_set_id = tfe_variable_set.tfe_varset_cloudplatform[each.key].id
   depends_on      = [tfe_variable_set.tfe_varset_cloudplatform]
 }
+

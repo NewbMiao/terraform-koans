@@ -68,10 +68,18 @@ output "tfe_user_name" {
   description = "The name of the TFE user"
   value       = aws_iam_user.tfe_user.name
 }
+data "tfe_project" "cloudplatform" {
+  name = "cloudplatform"
+}
+
+output "cloudplatform_project_id" {
+  description = "The ID of the cloudplatform project"
+  value       = data.tfe_project.cloudplatform.id
+}
 locals {
   tfe_project_ids = {
     cloudplatform = {
-      project_id    = "prj-ifPU81zqNih2NHxM"
+      project_id    = data.tfe_project.cloudplatform.id
       workspace_ids = []
     }
   }
