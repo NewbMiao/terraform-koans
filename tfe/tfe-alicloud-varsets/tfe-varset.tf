@@ -1,6 +1,9 @@
 locals {
   tfe_project_ids = {
-    cloudplatform = "prj-ifPU81zqNih2NHxM",
+    cloudplatform = {
+      project_id    = "prj-ifPU81zqNih2NHxM"
+      workspace_ids = []
+    }
   }
 }
 

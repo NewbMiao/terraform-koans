@@ -4,7 +4,7 @@ terraform {
     hostname     = "app.terraform.io"
     organization = "newbmiao"
     workspaces {
-      name = "tfe-varsets"
+      name = "tfe-aws-varsets"
     }
   }
 }
