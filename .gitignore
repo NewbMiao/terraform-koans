@@ -8,4 +8,6 @@ modules/
 
 node_modules/
 package-lock.json
+nodejs
 *.zip
+.DS_Store
