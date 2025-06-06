@@ -30,7 +30,11 @@ provider "aws" {
     events     = "http://localhost:4566"
   }
 }
-
+# if use tflocal, then no need to configure aws provider, it will use the localstack by default
+# provider "aws" {}
+# provider "aws" {
+#   alias = "member"
+# }
 provider "tfe" {
   hostname     = "app.terraform.io"
   organization = "newbmiao"
