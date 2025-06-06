@@ -1,33 +1,52 @@
 repos:
+  # Terraform-specific hooks
   - repo: https://github.com/antonbabenko/pre-commit-terraform
     rev: v1.79.0
     hooks:
+      # Code formatting and validation
       - id: terraform_fmt
       - id: terraform_validate
         args:
           - --hook-config=--retry-once-with-cleanup=true
+
+      # Documentation
       - id: terraform_docs
         args:
           - "--args=--lockfile=false"
+
+      # Linting rules
       - id: terraform_tflint
         args:
-          - "--args=--only=terraform_deprecated_interpolation"
-          - "--args=--only=terraform_deprecated_index"
+          # Code quality checks
           - "--args=--only=terraform_unused_declarations"
           - "--args=--only=terraform_comment_syntax"
-          # - "--args=--only=terraform_documented_outputs"
+
+          # Deprecation checks
+          - "--args=--only=terraform_deprecated_interpolation"
+          - "--args=--only=terraform_deprecated_index"
+
+          # Documentation and type checks
           - "--args=--only=terraform_documented_variables"
           - "--args=--only=terraform_typed_variables"
+          # - "--args=--only=terraform_documented_outputs"  # Disabled for now
+
+          # Module and version checks
           - "--args=--only=terraform_module_pinned_source"
-          - "--args=--only=terraform_naming_convention"
           - "--args=--only=terraform_required_version"
           - "--args=--only=terraform_required_providers"
-          # - "--args=--only=terraform_standard_module_structure"
+
+          # Naming and structure checks
+          - "--args=--only=terraform_naming_convention"
           - "--args=--only=terraform_workspace_remote"
+          # - "--args=--only=terraform_standard_module_structure"  # Disabled for now
+
+  # General Git hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
       - id: check-merge-conflict
       - id: end-of-file-fixer
+
+# Global settings
 default_stages: [pre-commit, pre-push]
 default_install_hook_types: [pre-commit, pre-push]

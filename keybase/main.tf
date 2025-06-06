@@ -1,6 +1,6 @@
 locals {
   secret       = "secret_value_placeholder"
-  keybase_user = "" # Replace with your Keybase username
+  keybase_user = "newbmiao_test" # Replace with your Keybase username
 }
 
 data "external" "encrypt_secret" {
