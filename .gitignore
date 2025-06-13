@@ -11,3 +11,4 @@ package-lock.json
 nodejs
 *.zip
 .DS_Store
+tmp*.json
