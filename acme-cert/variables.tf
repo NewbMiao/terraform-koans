@@ -1,9 +1,11 @@
 variable "aliyun_access_key" {
-  type      = string
-  sensitive = true
+  type        = string
+  description = "value of the Alibaba Cloud access key"
+  sensitive   = true
 }
 
 variable "aliyun_secret_key" {
-  type      = string
-  sensitive = true
+  description = "value of the Alibaba Cloud secret key"
+  type        = string
+  sensitive   = true
 }

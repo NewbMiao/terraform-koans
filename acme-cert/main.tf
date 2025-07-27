@@ -1,5 +1,7 @@
 
 
+# Tips: zerossl requires a registration to issue certificates, while let's encrypt does not require registration
+# https://community.letsencrypt.org/t/the-acme-sh-will-change-default-ca-to-zerossl-on-august-1st-2021/144052/11
 resource "acme_registration" "reg" {
   email_address = "newbvirgil@gmail.com"
 }
