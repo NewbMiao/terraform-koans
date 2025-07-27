@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tfc-agent
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: tfc-agent
+spec:
+  serviceName: "tfc-agent"
+  replicas: {{ .Values.deployment.replicaCount }}
+  selector:
+    matchLabels:
+      app: tfc-agent
+  template:
+    metadata:
+      labels:
+        app: tfc-agent
+      annotations:
+        configmap-hash: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      terminationGracePeriodSeconds: 900
+      securityContext:
+        fsGroup: 999
+      containers:
+        - name: agent-scripts
+          image: alpine:3.18
+          command: ["/bin/sh", "-c"]
+          args:
+            - /bin/sh /scripts/inithooks.sh && /bin/sh /scripts/cleanup.sh
+          volumeMounts:
+            - name: script
+              mountPath: /scripts
+            - name: agent-storage
+              mountPath: /cache
+        - name: tfc-agent
+          image: "{{ .Values.agent.image }}:{{ .Values.agent.tag }}"
+          securityContext:
+            runAsUser: 999
+          volumeMounts:
+            - name: agent-storage
+              mountPath: /cache
+          env:
+            - name: TFC_AGENT_HOOK_TIMEOUT
+              value: "60"
+            - name: TFC_AGENT_CACHE_DIR
+              value: /cache
+            - name: TFC_AGENT_DATA_DIR
+              value: /cache/data
+            - name: TF_PLUGIN_CACHE_DIR
+              value: /cache/plugin-cache
+            - name: TFC_AGENT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: tfc-agent-secret
+                  key: token
+            - name: TFC_AGENT_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: TFC_ADDRESS
+              value: {{ .Values.agent.tfcAddress | quote }}
+            - name: TFC_AGENT_LOG_LEVEL
+              value: {{ .Values.agent.logLevel | quote }}
+          resources:
+            {{- toYaml .Values.deployment.resources | nindent 12 }}
+      volumes:
+        - name: script
+          configMap:
+            name: agent-scripts
+        {{- if not .Values.deployment.usePV }}
+        - name: agent-storage
+          emptyDir: {}
+        {{- end }}
+  {{- if .Values.deployment.usePV }}
+  volumeClaimTemplates:
+  - metadata:
+      name: agent-storage
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: agent-disk-essd
+      resources:
+        requests:
+          storage: {{ .Values.deployment.storageSize | default "20Gi" }}
+  {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tfc-agent
+  namespace: {{ .Values.namespace }}
+spec:
+  clusterIP: None
+  selector:
+    app: tfc-agent

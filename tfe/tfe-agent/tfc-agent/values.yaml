@@ -1,0 +1,21 @@
+namespace: tfc-agent-test
+Secret:
+  tfcToken: "placeholder-for-tfc-token"
+agent:
+  image: hashicorp/tfc-agent
+  tag: 1.23
+  logLevel: info
+  tfcAddress: "https://app.terraform.io" # TFC server address
+
+# Deployment configuration
+deployment:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 1000m
+      memory: 3000Mi
+    limits:
+      cpu: 2000m
+      memory: 6000Mi
+  usePV: false # Set to true if using Persistent Volumes for plugins cache persistency when agent restarts
+  storageSize: "20Gi" # Size of the persistent volume if usePV is true
