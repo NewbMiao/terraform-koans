@@ -1,4 +1,4 @@
-namespace: tfc-agent-test
+namespace: tfc-agent
 Secret:
   tfcToken: "placeholder-for-tfc-token"
 agent:
@@ -9,6 +9,8 @@ agent:
 
 # Deployment configuration
 deployment:
+  fsGroup: 0 # set it based on your k8s cluster, 0 for local development
+  fsUser: 0 # set it based on your k8s cluster, 0 for local development
   replicaCount: 1
   resources:
     requests:
@@ -17,5 +19,8 @@ deployment:
     limits:
       cpu: 2000m
       memory: 6000Mi
-  usePV: false # Set to true if using Persistent Volumes for plugins cache persistency when agent restarts
-  storageSize: "20Gi" # Size of the persistent volume if usePV is true
+  usePV: true # Set to true if using Persistent Volumes for plugins cache persistency when agent restarts
+  # storageClassName: "agent-disk-essd" # "agent-disk-essd" for production
+  # storageSize: "20Gi"
+  storageClassName: "hostpath" # use "hostpath" for local development
+  storageSize: "5Gi"

@@ -20,7 +20,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 900
       securityContext:
-        fsGroup: 999
+        fsGroup: {{ .Values.deployment.fsGroup }}
       containers:
         - name: agent-scripts
           image: alpine:3.18
@@ -35,7 +35,7 @@ spec:
         - name: tfc-agent
           image: "{{ .Values.agent.image }}:{{ .Values.agent.tag }}"
           securityContext:
-            runAsUser: 999
+            runAsUser: {{ .Values.deployment.fsUser }}
           volumeMounts:
             - name: agent-storage
               mountPath: /cache
@@ -78,10 +78,10 @@ spec:
     spec:
       accessModes:
         - ReadWriteOnce
-      storageClassName: agent-disk-essd
+      storageClassName: {{ .Values.deployment.storageClassName }}
       resources:
         requests:
-          storage: {{ .Values.deployment.storageSize | default "20Gi" }}
+          storage: {{ .Values.deployment.storageSize }}
   {{- end }}
 ---
 apiVersion: v1
