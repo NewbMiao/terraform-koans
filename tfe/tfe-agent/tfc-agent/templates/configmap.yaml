@@ -13,10 +13,10 @@ data:
     echo "RunID: "${TFC_RUN_ID:-}
     # monnorepo cleanup unrelaeted folders except infrastructure
     TARGET_RUN_DIR=/cache/data/component/terraform/runs/"$TFC_RUN_ID"
-    CONDITION_DIR=$(find $TARGET_RUN_DIR -type d -path "*/config/infrastructure" 2>/dev/null | head -n 1)
+    CONDITION_DIR=$(find $TARGET_RUN_DIR -type d -path "*/config/infrastructure/dev" 2>/dev/null | head -n 1)
     if [ -n "$CONDITION_DIR" ] && [ -d "$CONDITION_DIR" ]; then
         TARGET_CONFIG_DIR="$TARGET_RUN_DIR/config"
-        echo "Locate folder '$TARGET_CONFIG_DIR' for monorepo, will clean up other folders except infrastructure."
+        echo "Locate monorepo, will clean up other folders except infrastructure."
         cd "$TARGET_CONFIG_DIR"
         echo "Config Size before clean up:"
         du -sh .
@@ -43,6 +43,7 @@ data:
     echo "===agent inithooks.sh==="
     echo "init terraform hooks in /cache/data/hooks..."
     mkdir -p /cache/data/hooks
+    rm -rf terraform-*
     cd /cache/data/hooks
     cp /scripts/pre-plan.sh terraform-pre-plan
     cp /scripts/post-plan.sh terraform-post-plan

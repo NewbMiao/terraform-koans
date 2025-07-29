@@ -21,6 +21,7 @@ spec:
       terminationGracePeriodSeconds: 900
       securityContext:
         fsGroup: {{ .Values.deployment.fsGroup }}
+        runAsUser: {{ .Values.deployment.fsUser }}
       containers:
         - name: agent-scripts
           image: alpine:3.18
@@ -34,8 +35,6 @@ spec:
               mountPath: /cache
         - name: tfc-agent
           image: "{{ .Values.agent.image }}:{{ .Values.agent.tag }}"
-          securityContext:
-            runAsUser: {{ .Values.deployment.fsUser }}
           volumeMounts:
             - name: agent-storage
               mountPath: /cache
