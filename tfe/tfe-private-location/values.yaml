@@ -1,0 +1,6 @@
+replicaCount: 1
+image:
+  repository: datadog/synthetics-private-location-worker
+  pullPolicy: IfNotPresent
+  tag: 1.59.0
+configFile: "{}"
