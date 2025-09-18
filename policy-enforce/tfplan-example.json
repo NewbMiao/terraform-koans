@@ -1,0 +1,362 @@
+{
+    "format_version": "1.2",
+    "terraform_version": "1.9.2",
+    "planned_values": {
+        "outputs": {
+            "current_caller_identity": {
+                "sensitive": false,
+                "type": [
+                    "object",
+                    {
+                        "account_id": "string",
+                        "arn": "string",
+                        "id": "string",
+                        "identity_type": "string"
+                    }
+                ],
+                "value": {
+                    "account_id": "1111111111111",
+                    "arn": "acs:ram::1111111111111:assumed-role/role1/terraform",
+                    "id": "33333333:terraform",
+                    "identity_type": "AssumedRoleUser"
+                }
+            },
+            "module_caller_identity": {
+                "sensitive": false,
+                "type": [
+                    "object",
+                    {
+                        "account_id": "string",
+                        "arn": "string",
+                        "id": "string",
+                        "identity_type": "string"
+                    }
+                ],
+                "value": {
+                    "account_id": "1222222",
+                    "arn": "acs:ram::1222222:user/user1",
+                    "id": "2000000000",
+                    "identity_type": "RAMUser"
+                }
+            }
+        },
+        "root_module": {
+            "child_modules": [
+                {
+                    "resources": [
+                        {
+                            "address": "module.demo.alicloud_vpc.name",
+                            "mode": "managed",
+                            "type": "alicloud_vpc",
+                            "name": "name",
+                            "provider_name": "registry.terraform.io/hashicorp/alicloud",
+                            "schema_version": 0,
+                            "values": {
+                                "cidr_block": "10.0.0.0/20",
+                                "classic_link_enabled": null,
+                                "description": null,
+                                "dry_run": null,
+                                "enable_ipv6": null,
+                                "force_delete": null,
+                                "ipv4_cidr_mask": null,
+                                "ipv4_ipam_pool_id": null,
+                                "ipv6_isp": null,
+                                "is_default": null,
+                                "secondary_cidr_mask": null,
+                                "system_route_table_description": null,
+                                "system_route_table_name": null,
+                                "tags": null,
+                                "timeouts": null,
+                                "vpc_name": "test-vpc"
+                            },
+                            "sensitive_values": {
+                                "ipv6_cidr_blocks": [],
+                                "secondary_cidr_blocks": [],
+                                "user_cidrs": []
+                            }
+                        }
+                    ],
+                    "address": "module.demo"
+                }
+            ]
+        }
+    },
+    "resource_changes": [
+        {
+            "address": "module.demo.alicloud_vpc.name",
+            "module_address": "module.demo",
+            "mode": "managed",
+            "type": "alicloud_vpc",
+            "name": "name",
+            "provider_name": "registry.terraform.io/hashicorp/alicloud",
+            "change": {
+                "actions": [
+                    "create"
+                ],
+                "before": null,
+                "after": {
+                    "cidr_block": "10.0.0.0/20",
+                    "classic_link_enabled": null,
+                    "description": null,
+                    "dry_run": null,
+                    "enable_ipv6": null,
+                    "force_delete": null,
+                    "ipv4_cidr_mask": null,
+                    "ipv4_ipam_pool_id": null,
+                    "ipv6_isp": null,
+                    "is_default": null,
+                    "secondary_cidr_mask": null,
+                    "system_route_table_description": null,
+                    "system_route_table_name": null,
+                    "tags": null,
+                    "timeouts": null,
+                    "vpc_name": "test-vpc"
+                },
+                "after_unknown": {
+                    "create_time": true,
+                    "dns_hostname_status": true,
+                    "id": true,
+                    "ipv6_cidr_block": true,
+                    "ipv6_cidr_blocks": true,
+                    "name": true,
+                    "region_id": true,
+                    "resource_group_id": true,
+                    "route_table_id": true,
+                    "router_id": true,
+                    "router_table_id": true,
+                    "secondary_cidr_blocks": true,
+                    "status": true,
+                    "system_route_table_route_propagation_enable": true,
+                    "user_cidrs": true
+                },
+                "before_sensitive": false,
+                "after_sensitive": {
+                    "ipv6_cidr_blocks": [],
+                    "secondary_cidr_blocks": [],
+                    "user_cidrs": []
+                }
+            }
+        }
+    ],
+    "output_changes": {
+        "current_caller_identity": {
+            "actions": [
+                "create"
+            ],
+            "before": null,
+            "after": {
+                "account_id": "1111111111111",
+                "arn": "acs:ram::1111111111111:assumed-role/role1/terraform",
+                "id": "33333333:terraform",
+                "identity_type": "AssumedRoleUser"
+            },
+            "after_unknown": false,
+            "before_sensitive": false,
+            "after_sensitive": false
+        },
+        "module_caller_identity": {
+            "actions": [
+                "create"
+            ],
+            "before": null,
+            "after": {
+                "account_id": "1222222",
+                "arn": "acs:ram::1222222:user/user1",
+                "id": "2000000000",
+                "identity_type": "RAMUser"
+            },
+            "after_unknown": false,
+            "before_sensitive": false,
+            "after_sensitive": false
+        }
+    },
+    "prior_state": {
+        "format_version": "1.0",
+        "terraform_version": "1.9.2",
+        "values": {
+            "outputs": {
+                "current_caller_identity": {
+                    "sensitive": false,
+                    "value": {
+                        "account_id": "1111111111111",
+                        "arn": "acs:ram::1111111111111:assumed-role/role1/terraform",
+                        "id": "33333333:terraform",
+                        "identity_type": "AssumedRoleUser"
+                    },
+                    "type": [
+                        "object",
+                        {
+                            "account_id": "string",
+                            "arn": "string",
+                            "id": "string",
+                            "identity_type": "string"
+                        }
+                    ]
+                },
+                "module_caller_identity": {
+                    "sensitive": false,
+                    "value": {
+                        "account_id": "1222222",
+                        "arn": "acs:ram::1222222:user/user1",
+                        "id": "2000000000",
+                        "identity_type": "RAMUser"
+                    },
+                    "type": [
+                        "object",
+                        {
+                            "account_id": "string",
+                            "arn": "string",
+                            "id": "string",
+                            "identity_type": "string"
+                        }
+                    ]
+                }
+            },
+            "root_module": {
+                "resources": [
+                    {
+                        "address": "data.alicloud_caller_identity.current",
+                        "mode": "data",
+                        "type": "alicloud_caller_identity",
+                        "name": "current",
+                        "provider_name": "registry.terraform.io/aliyun/alicloud",
+                        "schema_version": 0,
+                        "values": {
+                            "account_id": "1111111111111",
+                            "arn": "acs:ram::1111111111111:assumed-role/role1/terraform",
+                            "id": "33333333:terraform",
+                            "identity_type": "AssumedRoleUser"
+                        },
+                        "sensitive_values": {}
+                    }
+                ],
+                "child_modules": [
+                    {
+                        "resources": [
+                            {
+                                "address": "module.demo.data.alicloud_caller_identity.module_caller_identity",
+                                "mode": "data",
+                                "type": "alicloud_caller_identity",
+                                "name": "module_caller_identity",
+                                "provider_name": "registry.terraform.io/hashicorp/alicloud",
+                                "schema_version": 0,
+                                "values": {
+                                    "account_id": "1222222",
+                                    "arn": "acs:ram::1222222:user/user1",
+                                    "id": "2000000000",
+                                    "identity_type": "RAMUser"
+                                },
+                                "sensitive_values": {}
+                            }
+                        ],
+                        "address": "module.demo"
+                    }
+                ]
+            }
+        }
+    },
+    "configuration": {
+        "provider_config": {
+            "alicloud": {
+                "name": "alicloud",
+                "full_name": "registry.terraform.io/aliyun/alicloud",
+                "version_constraint": "\u003e= 1.259.0",
+                "expressions": {
+                    "assume_role": [
+                        {}
+                    ]
+                }
+            },
+            "module.demo:alicloud": {
+                "name": "alicloud",
+                "full_name": "registry.terraform.io/hashicorp/alicloud",
+                "module_address": "module.demo"
+            }
+        },
+        "root_module": {
+            "outputs": {
+                "current_caller_identity": {
+                    "expression": {
+                        "references": [
+                            "data.alicloud_caller_identity.current"
+                        ]
+                    }
+                },
+                "module_caller_identity": {
+                    "expression": {
+                        "references": [
+                            "module.demo.caller_identity",
+                            "module.demo"
+                        ]
+                    }
+                }
+            },
+            "resources": [
+                {
+                    "address": "data.alicloud_caller_identity.current",
+                    "mode": "data",
+                    "type": "alicloud_caller_identity",
+                    "name": "current",
+                    "provider_config_key": "alicloud",
+                    "schema_version": 0
+                }
+            ],
+            "module_calls": {
+                "demo": {
+                    "source": "./module-with-hasicorp-provider",
+                    "module": {
+                        "outputs": {
+                            "caller_identity": {
+                                "expression": {
+                                    "references": [
+                                        "data.alicloud_caller_identity.module_caller_identity"
+                                    ]
+                                }
+                            }
+                        },
+                        "resources": [
+                            {
+                                "address": "alicloud_vpc.name",
+                                "mode": "managed",
+                                "type": "alicloud_vpc",
+                                "name": "name",
+                                "provider_config_key": "module.demo:alicloud",
+                                "expressions": {
+                                    "cidr_block": {
+                                        "constant_value": "10.0.0.0/20"
+                                    },
+                                    "vpc_name": {
+                                        "constant_value": "test-vpc"
+                                    }
+                                },
+                                "schema_version": 0
+                            },
+                            {
+                                "address": "data.alicloud_caller_identity.module_caller_identity",
+                                "mode": "data",
+                                "type": "alicloud_caller_identity",
+                                "name": "module_caller_identity",
+                                "provider_config_key": "module.demo:alicloud",
+                                "schema_version": 0
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "relevant_attributes": [
+        {
+            "resource": "module.demo.data.alicloud_caller_identity.module_caller_identity",
+            "attribute": []
+        },
+        {
+            "resource": "data.alicloud_caller_identity.current",
+            "attribute": []
+        }
+    ],
+    "timestamp": "2025-09-18T18:47:22Z",
+    "applyable": true,
+    "complete": true,
+    "errored": false
+}

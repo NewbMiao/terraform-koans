@@ -1,0 +1,8 @@
+.env
+.terraform
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+tfplan
+*.json
+!tfplan-example.json
