@@ -16,7 +16,8 @@ spec:
       labels:
         app: tfc-agent
       annotations:
-        configmap-hash: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        scriptConfigHash: {{ .Values.scriptConfigHash }}
+        policyConfigHash: {{ .Values.policyConfigHash }}
     spec:
       terminationGracePeriodSeconds: 900
       securityContext:
@@ -27,10 +28,12 @@ spec:
           image: alpine:3.18
           command: ["/bin/sh", "-c"]
           args:
-            - /bin/sh /scripts/inithooks.sh && /bin/sh /scripts/cleanup.sh
+            - /bin/sh /scripts/init.sh && /bin/sh /scripts/cleanup.sh
           volumeMounts:
-            - name: script
+            - name: scripts
               mountPath: /scripts
+            - name: policies
+              mountPath: /policies
             - name: agent-storage
               mountPath: /cache
         - name: tfc-agent
@@ -38,7 +41,11 @@ spec:
           volumeMounts:
             - name: agent-storage
               mountPath: /cache
+            - name: policies
+              mountPath: /policies
           env:
+            - name: PATH
+              value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/local/bin:/cache/bin
             - name: TFC_AGENT_HOOK_TIMEOUT
               value: "60"
             - name: TFC_AGENT_CACHE_DIR
@@ -63,9 +70,12 @@ spec:
           resources:
             {{- toYaml .Values.deployment.resources | nindent 12 }}
       volumes:
-        - name: script
+        - name: scripts
           configMap:
             name: agent-scripts
+        - name: policies
+          configMap:
+            name: agent-policies
         {{- if not .Values.deployment.usePV }}
         - name: agent-storage
           emptyDir: {}

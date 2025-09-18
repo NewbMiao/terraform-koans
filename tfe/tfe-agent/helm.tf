@@ -1,3 +1,4 @@
+
 resource "kubernetes_namespace" "namespaces" {
   metadata {
     name   = "tfc-agent"
@@ -14,9 +15,20 @@ resource "helm_release" "tfc_agent" {
 
   values = [file("./tfc-agent/values.yaml")]
 
+  set {
+    name  = "scriptConfigHash"
+    value = local.script_config_hash
+  }
+  set {
+    name  = "policyConfigHash"
+    value = local.policy_config_hash
+  }
   set_sensitive {
     name  = "Secret.tfcToken"
     value = var.tfc_agent_token # "sensitive value fetched from some secure source"
   }
-  depends_on = [kubernetes_namespace.namespaces]
+  depends_on = [
+    kubernetes_namespace.namespaces,
+    kubernetes_config_map.agent_config,
+  ]
 }

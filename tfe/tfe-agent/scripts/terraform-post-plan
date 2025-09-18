@@ -1,0 +1,44 @@
+#!/bin/sh
+echo "===agent post plan hook==="
+RUN_DIR=/cache/data/component/terraform/runs/"$TFC_RUN_ID"
+PLAN_FILE="$RUN_DIR/config/terraform.tfplan"
+PLAN_JSON="$RUN_DIR/config/plan.json"
+export PATH=/cache/bin:$PATH
+export TF_PLUGIN_CACHE_DIR=/cache/plugin-cache
+
+if ! command -v tfenv >/dev/null 2>&1; then
+    echo "tfenv not found, installing via git..."
+    git clone https://github.com/tfutils/tfenv.git /cache/tfenv
+    ln -sf /cache/tfenv/bin/* /cache/bin/
+fi
+TF_VERISON=$(cat .terraform/terraform.tfstate |jq -r .terraform_version)
+tfenv use $TF_VERISON
+terraform init  -backend=false
+# cp -r ../../ /cache/data/component/terraform/runs/test #debug
+terraform show -json "$PLAN_FILE" > "$PLAN_JSON"
+conftest test "$PLAN_JSON" -p /policies --namespace terraform -o pretty
+
+# Not an option to fetch plan.json via api:  always 204 during plan
+# if [ -n "$TFC_RUN_ID" ] && [ -n "$TF_API_TOKEN" ]; then
+#     echo "Fetching plan JSON from TFC API..."
+#     MAX_API_RETRIES=10
+#     API_RETRY_DELAY=10
+#     for attempt in $(seq 1 $MAX_API_RETRIES); do
+#         HTTP_STATUS=$(curl -s -w "%{http_code}" -H "Authorization: Bearer $TF_API_TOKEN" \
+#             "https://app.terraform.io/api/v2/runs/$TFC_RUN_ID/plan/json-output" -o plan.json)
+#         if [ "$HTTP_STATUS" -eq 200 ]; then
+#             break
+#         fi
+#         if [ "$HTTP_STATUS" -eq 204 ]; then
+#             sleep $API_RETRY_DELAY
+#             echo "Not ready(HTTP $HTTP_STATUS). Retry after $API_RETRY_DELAY s"
+#             continue
+#         fi
+#         break
+#         echo "Error(HTTP $HTTP_STATUS)."
+#     done
+#     cat plan.json
+#     if [ -s "plan.json" ] && jq empty plan.json >/dev/null 2>&1; then
+#         conftest test plan.json -p /policies --namespace terraform -o pretty
+#     fi
+# fi

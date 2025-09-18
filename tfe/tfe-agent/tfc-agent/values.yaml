@@ -6,6 +6,8 @@ agent:
   tag: 1.23
   logLevel: info
   tfcAddress: "https://app.terraform.io" # TFC server address
+scriptConfigHash: ""
+policyConfigHash": ""
 
 # Deployment configuration
 deployment:
