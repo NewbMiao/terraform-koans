@@ -1,0 +1,19 @@
+rules:
+  idiomatic:
+    directory-package-mismatch:
+      level: ignore
+      exclude-test-suffix: true
+  style:
+    line-length:
+      level: error
+      max-line-length: 150
+  imports:
+    redundant-alias:
+      level: ignore
+    avoid-importing-input:
+      level: ignore
+    unresolved-reference:
+      level: error
+      except-paths:
+        - input.plan.**
+        - input.run.**

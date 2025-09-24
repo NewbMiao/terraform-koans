@@ -1,0 +1,22 @@
+repos:
+- repo: https://github.com/open-policy-agent/regal
+  rev: v0.36.1
+  hooks:
+    - id: regal-lint-use-path
+      language: system
+      name: OPA formatting 
+      description: policy file linting with Regal from Styra using system $PATH
+      entry: regal fix --force
+      files: (\.rego)$
+    - id: regal-lint-use-path
+      language: system
+      name: OPA linting
+      description: policy file linting with Regal from Styra using system $PATH
+      entry: regal lint
+      files: (\.rego)$
+    - id: regal-lint-use-path
+      language: system
+      name: OPA testing
+      description: policy file linting with Regal from Styra using system $PATH
+      entry: regal test
+      files: (\.rego)$
