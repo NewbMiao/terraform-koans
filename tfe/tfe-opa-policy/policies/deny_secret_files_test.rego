@@ -27,7 +27,7 @@ test_deny_secret_file_deny if {
 }
 
 test_deny_secret_file_pass if {
-	result := terraform.deny with input.plan as {"resource_changes": [{
+	count(terraform.deny) == 0 with input.plan as {"resource_changes": [{
 		"address": "local_file.user_data",
 		"mode": "managed",
 		"type": "local_file",
@@ -47,5 +47,4 @@ test_deny_secret_file_pass if {
 			},
 		},
 	}]}
-	count(result) == 0
 }

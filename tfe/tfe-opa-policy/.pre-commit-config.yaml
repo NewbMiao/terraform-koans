@@ -18,5 +18,5 @@ repos:
       language: system
       name: OPA testing
       description: policy file linting with Regal from Styra using system $PATH
-      entry: regal test
+      entry: regal test -v
       files: (\.rego)$

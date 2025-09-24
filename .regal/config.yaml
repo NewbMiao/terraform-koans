@@ -1,12 +1,13 @@
 rules:
   idiomatic:
+    no-defined-entrypoint:
+      level: ignore
     directory-package-mismatch:
       level: ignore
-      exclude-test-suffix: true
   style:
     line-length:
       level: error
-      max-line-length: 150
+      max-line-length: 200
   imports:
     redundant-alias:
       level: ignore

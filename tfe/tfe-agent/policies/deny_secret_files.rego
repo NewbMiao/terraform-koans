@@ -1,13 +1,12 @@
 package terraform
 
+import input as plan
 import rego.v1
 
-import input as plan
-
 deny contains msg if {
-	resource := plan.resource_changes[_]
+	some resource in plan.resource_changes
 	resource.type == "local_file"
-	action := resource.change.actions[_]
+	some action in resource.change.actions
 	action == "create"
 	filename := resource.change.after.filename
 	forbidden_prefix(filename)

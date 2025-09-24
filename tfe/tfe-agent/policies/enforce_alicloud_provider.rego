@@ -1,6 +1,8 @@
 # invalid alicloud provider check
 package terraform
 
+import rego.v1
+
 deny contains msg if {
 	some resource in input.resource_changes
 	resource.provider_name == "registry.terraform.io/hashicorp/alicloud"

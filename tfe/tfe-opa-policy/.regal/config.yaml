@@ -1,0 +1,20 @@
+rules:
+  idiomatic:
+    no-defined-entrypoint:
+      level: ignore
+    directory-package-mismatch:
+      level: ignore
+  style:
+    line-length:
+      level: error
+      max-line-length: 200
+  imports:
+    redundant-alias:
+      level: ignore
+    avoid-importing-input:
+      level: ignore
+    unresolved-reference:
+      level: error
+      except-paths:
+        - input.plan.**
+        - input.run.**
