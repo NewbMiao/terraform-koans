@@ -9,7 +9,7 @@ resource "null_resource" "install_deps" {
       cd ${path.module}/dep && \
       mkdir -p nodejs 
       cp package.json nodejs/
-      npm install --target_arch=x64 --production --prefix nodejs
+      npm install --omit=dev --prefix nodejs # ensure run it in the correct nodejs runtime, e.g. node:20-bullseye
     EOT
   }
 }
