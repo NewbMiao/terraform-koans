@@ -1,0 +1,85 @@
+name: 'Production-Terraform-$(Build.BuildId)'
+
+trigger: none
+
+variables:
+  service_connection: 'sc-azure-oidc'
+  tf_state_rg: 'rg-terraform-state'
+  tf_state_sa: 'REPLACE_WITH_YOUR_STORAGE_ACCOUNT_NAME'
+  tf_working_dir: 'environments/prod'
+  tf_state_container: 'tfstate-prod'
+  tf_state_key: 'terraform.tfstate'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: Plan
+  displayName: 'Plan [Production]'
+  jobs:
+  - job: TerraformPlan
+    steps:
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: 'latest'
+
+    - task: TerraformCLI@1
+      displayName: 'Terraform Init'
+      inputs:
+        command: 'init'
+        workingDirectory: '$(tf_working_dir)'
+        backendType: 'azurerm'
+        backendServiceArm: '$(service_connection)'
+        backendAzureRmResourceGroupName: '$(tf_state_rg)'
+        backendAzureRmStorageAccountName: '$(tf_state_sa)'
+        backendAzureRmContainerName: '$(tf_state_container)'
+        backendAzureRmKey: '$(tf_state_key)'
+
+    - task: TerraformCLI@1
+      displayName: 'Terraform Plan'
+      inputs:
+        command: 'plan'
+        workingDirectory: '$(tf_working_dir)'
+        environmentServiceName: '$(service_connection)'
+        commandOptions: '-out=$(Build.ArtifactStagingDirectory)/tfplan'
+
+    - publish: '$(Build.ArtifactStagingDirectory)/tfplan'
+      artifact: 'tfplan_prod'
+
+- stage: Apply
+  displayName: 'Apply [Production]'
+  dependsOn: Plan
+  condition: succeeded()
+  jobs:
+  - deployment: TerraformApply
+    environment: 'env-prod'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: TerraformInstaller@1
+            inputs:
+              terraformVersion: 'latest'
+
+          - download: current
+            artifact: 'tfplan_prod'
+
+          - task: TerraformCLI@1
+            displayName: 'Terraform Init'
+            inputs:
+              command: 'init'
+              workingDirectory: '$(tf_working_dir)'
+              backendType: 'azurerm'
+              backendServiceArm: '$(service_connection)'
+              backendAzureRmResourceGroupName: '$(tf_state_rg)'
+              backendAzureRmStorageAccountName: '$(tf_state_sa)'
+              backendAzureRmContainerName: 'tfstate-prod'
+              backendAzureRmKey: 'terraform.tfstate'
+
+          - task: TerraformCLI@1
+            displayName: 'Terraform Apply'
+            inputs:
+              command: 'apply'
+              workingDirectory: '$(tf_working_dir)'
+              environmentServiceName: '$(service_connection)'
+              commandOptions: '$(Pipeline.Workspace)/tfplan_prod/tfplan'

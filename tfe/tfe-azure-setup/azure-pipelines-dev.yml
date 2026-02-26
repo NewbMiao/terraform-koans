@@ -1,0 +1,101 @@
+name: 'Dev-Terraform-$(Build.BuildId)'
+
+trigger:
+  branches:
+    include:
+      - develop   # 开发环境
+
+pr:
+  branches:
+    include:
+      - develop
+
+variables:
+  service_connection: 'sc-azure-oidc'
+  tf_state_rg: 'rg-terraform-state'
+  tf_state_sa: 'REPLACE_WITH_YOUR_STORAGE_ACCOUNT_NAME'  # 替换为你的 Storage Account Name
+  tf_working_dir: 'environments/dev'
+  tf_state_container: 'tfstate-dev'
+  tf_state_key: 'terraform.tfstate'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+# ==========================================
+# Stage 1: Terraform Plan
+# ==========================================
+- stage: Plan
+  displayName: 'Plan [Dev]'
+  jobs:
+  - job: TerraformPlan
+    steps:
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: 'latest'
+
+    - task: TerraformCLI@1
+      displayName: 'Terraform Init (OIDC)'
+      inputs:
+        command: 'init'
+        workingDirectory: '$(tf_working_dir)'
+        backendType: 'azurerm'
+        backendServiceArm: '$(service_connection)'
+        backendAzureRmResourceGroupName: '$(tf_state_rg)'
+        backendAzureRmStorageAccountName: '$(tf_state_sa)'
+        backendAzureRmContainerName: '$(tf_state_container)'
+        backendAzureRmKey: '$(tf_state_key)'
+
+    - task: TerraformCLI@1
+      displayName: 'Terraform Plan'
+      inputs:
+        command: 'plan'
+        workingDirectory: '$(tf_working_dir)'
+        environmentServiceName: '$(service_connection)'
+        commandOptions: '-out=$(Build.ArtifactStagingDirectory)/tfplan'
+
+    - publish: '$(Build.ArtifactStagingDirectory)/tfplan'
+      artifact: 'tfplan_dev'
+      displayName: 'Publish TF Plan Artifact'
+
+# ==========================================
+# Stage 2: Terraform Apply - 自动部署（无审批）
+# ==========================================
+- stage: Apply
+  displayName: 'Apply [Dev] - 自动部署'
+  dependsOn: Plan
+  condition: succeeded()
+  jobs:
+  - deployment: TerraformApply
+    environment: 'env-dev'  # Dev 环境无需审批
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: TerraformInstaller@1
+            inputs:
+              terraformVersion: 'latest'
+
+          - download: current
+            artifact: 'tfplan_dev'
+            displayName: 'Download TF Plan Artifact'
+
+          - task: TerraformCLI@1
+            displayName: 'Terraform Init for Apply'
+            inputs:
+              command: 'init'
+              workingDirectory: '$(tf_working_dir)'
+              backendType: 'azurerm'
+              backendServiceArm: '$(service_connection)'
+              backendAzureRmResourceGroupName: '$(tf_state_rg)'
+              backendAzureRmStorageAccountName: '$(tf_state_sa)'
+              backendAzureRmContainerName: 'tfstate-dev'
+              backendAzureRmKey: 'terraform.tfstate'
+
+          - task: TerraformCLI@1
+            displayName: 'Terraform Apply'
+            inputs:
+              command: 'apply'
+              workingDirectory: '$(tf_working_dir)'
+              environmentServiceName: '$(service_connection)'
+              commandOptions: '$(Pipeline.Workspace)/tfplan_dev/tfplan'
