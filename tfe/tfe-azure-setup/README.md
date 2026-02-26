@@ -6,7 +6,7 @@ Enterprise-grade Terraform CI/CD pipeline supporting multi-environment (Dev/Stg/
 
 ```
 ├── modules/              # Reusable modules
-│   └── app_service/  # App Service + MySQL module
+│   └── app_service/      # App Service module
 ├── environments/         # Environment configurations
 │   ├── dev/             # Development environment
 │   ├── stg/             # Staging environment
@@ -15,9 +15,13 @@ Enterprise-grade Terraform CI/CD pipeline supporting multi-environment (Dev/Stg/
 ├── azure-pipelines-stg.yml    # Staging Pipeline
 ├── azure-pipelines-prod.yml   # Production Pipeline
 ├── bootstrap/            # Bootstrap infrastructure
-│   ├── main.tf          # Create state storage
-│   └── providers.tf     # Provider configuration
-└── init.sh              # Bootstrap script (legacy)
+│   ├── main.tf          # Main Terraform configuration
+│   ├── providers.tf     # Provider configuration
+│   ├── constants.tf     # Common constants
+│   ├── oidc.tf          # OIDC configuration
+│   ├── pipelines.tf     # Pipeline definitions
+│   └── random.tf        # Random resources
+└── init.sh              # Bootstrap setup guide
 ```
 
 ## 🚀 Quick Start
@@ -28,44 +32,52 @@ Enterprise-grade Terraform CI/CD pipeline supporting multi-environment (Dev/Stg/
 - Terraform CLI (>= 1.5.0)
 - Azure DevOps account
 - Azure subscription (free account can be used for testing)
+- Git with SSH key configured
 
-### Step 1: Local Environment Setup
-
-#### Install Tools
-
-```bash
-# Install Azure CLI
-# macOS
-brew install azure-cli
-
-# Linux
-curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-
-# Install Terraform
-# macOS
-brew install terraform
-
-# Linux
-wget https://releases.hashicorp.com/terraform/1.5.0/terraform_1.5.0_linux_amd64.zip
-unzip terraform_1.5.0_linux_amd64.zip
-sudo mv terraform /usr/local/bin/
-```
-
-#### VS Code Extensions
-
-- HashiCorp Terraform
-- Azure Account (optional)
-
-### Step 2: Authenticate to Azure
+### Step 1: Run Bootstrap Setup Guide
 
 ```bash
-az login
-az account show
+./init.sh
 ```
 
-Confirm you're pointing to your free trial subscription ("Azure subscription 1" or "Free Trial").
+This script will:
+- Check and install Azure CLI and Azure DevOps extension
+- Authenticate to Azure
+- List existing resources
+- Display setup instructions
 
-### Step 3: Run Bootstrap Terraform
+### Step 2: Create Azure DevOps Organization
+
+If you don't have one, create at: https://dev.azure.com/
+
+### Step 3: Update Configuration
+
+Edit `bootstrap/constants.tf`:
+```hcl
+locals {
+  ado_org_name = "your-ado-org-name"  # Update this
+  # ... other configuration
+}
+```
+
+### Step 4: Set Up ADO Authentication
+
+Choose one of the following methods:
+
+**Option 1: Interactive Login (Recommended)**
+```bash
+az devops login --org https://dev.azure.com/YOUR_ORG
+```
+
+**Option 2: PAT Token**
+1. Generate PAT at: https://dev.azure.com/YOUR_ORG/_usersSettings/tokens
+2. Scopes: Full Access
+3. Set environment variable:
+   ```bash
+   export AZURE_DEVOPS_EXT_PAT='your-pat-token'
+   ```
+
+### Step 5: Run Terraform Bootstrap
 
 ```bash
 cd bootstrap
@@ -75,75 +87,86 @@ terraform apply
 ```
 
 This will create:
-- Resource Group: `rg-terraform-state`
-- Storage Account: `tfstatebootstrap`
-- State container: `tfstate-dev`
+- Azure DevOps Project
+- Git Repository
+- Resource Group
+- Storage Account (with unique name)
+- State Containers (dev, stg, prod)
+- OIDC Configuration (Azure AD App, Service Principal, Federated Credentials)
 
-**Important: Note the `storage_account_name` output!**
+**Important: Note the outputs!**
 
-### Step 4: Replace Placeholders
+### Step 6: Set Up SSH Key
 
-Search for `REPLACE_WITH_YOUR_STORAGE_ACCOUNT_NAME` in the following files and replace with the actual Storage Account Name:
+1. Generate SSH key (if you don't have one):
+   ```bash
+   ssh-keygen -t ed25519 -C "your-email@example.com"
+   ```
 
-- `environments/dev/providers.tf`
-- `environments/stg/providers.tf`
-- `environments/prod/providers.tf`
-- `azure-pipelines-dev.yml`
-- `azure-pipelines-stg.yml`
-- `azure-pipelines-prod.yml`
+2. Copy the public key:
+   ```bash
+   cat ~/.ssh/id_ed25519.pub
+   ```
 
-### Step 5: Local Test (Optional)
+3. Add SSH key to Azure DevOps:
+   - Go to: https://dev.azure.com/YOUR_ORG/_usersSettings/keys
+   - Click "Add SSH public key"
+   - Paste your public key
+   - Give it a name (e.g., "Development Machine")
 
-```bash
-cd environments/dev
-
-# Initialize Terraform
-terraform init
-
-# Review the plan
-terraform plan
-
-# Apply configuration (first time)
-terraform apply
-```
-
-### Step 6: Push to Azure DevOps
+### Step 7: Push Code to Azure DevOps
 
 ```bash
-# Initialize Git repository
+# Initialize Git repository (if not already initialized)
 git init
+
+# Add all files
 git add .
+
+# Commit changes
 git commit -m "Initial Terraform CI/CD setup"
 
-# Add remote repository
-git remote add origin <your-ado-repo-url>
-git push -u origin main
+# Add remote repository (using SSH)
+git remote add origin git@ssh.dev.azure.com:v3/YOUR_ORG/YOUR_PROJECT/YOUR_PROJECT
+
+# Push all branches and tags
+git push -u origin --all
 ```
 
-### Step 7: Azure DevOps Configuration
+Replace:
+- `YOUR_ORG` with your ADO organization name
+- `YOUR_PROJECT` with your ADO project name
 
-#### 1. Create Environments
+### Step 8: Create Pipelines in Azure DevOps
+
+1. Go to: https://dev.azure.com/YOUR_ORG/YOUR_PROJECT/_build
+2. Click "New Pipeline"
+3. Select "Azure Repos Git"
+4. Select your repository
+5. Choose "Existing Azure Pipelines YAML file"
+6. Select `azure-pipelines-dev.yml`
+7. Click "Continue"
+8. Click "Save"
+
+Repeat for `azure-pipelines-stg.yml` and `azure-pipelines-prod.yml` (optional).
+
+### Step 9: Configure Azure DevOps Resources
+
+#### Create Environments
 
 Go to `Pipelines` -> `Environments`, create:
 - `env-dev` (no approval required)
 - `env-stg` (add approval)
 - `env-prod` (add approval)
 
-#### 2. Create Service Connection
+#### Create Service Connection
 
 Go to `Project Settings` -> `Service connections`:
 - Name: `sc-azure-oidc`
 - Authentication method: `Workload Identity federation (automatic)`
 - Scope: Your Azure Subscription
 
-#### 3. Create Pipelines
-
-Create separate pipelines for each YAML file:
-- `azure-pipelines-dev.yml` (Dev Pipeline)
-- `azure-pipelines-stg.yml` (Staging Pipeline)
-- `azure-pipelines-prod.yml` (Production Pipeline)
-
-#### 4. Configure Pipeline Variables
+#### Configure Pipeline Variables
 
 Add variables to each pipeline:
 - `mysql_admin_password` (secret variable, locked)
@@ -166,6 +189,7 @@ For Prod environment, also add:
 - Complete passwordless authentication
 - Separate Federated Credential per environment
 - Workload Identity Federation
+- No secrets to manage
 
 ### Environment Isolation
 - Separate Resource Groups
@@ -173,7 +197,7 @@ For Prod environment, also add:
 - Separate configuration parameters
 
 ### Production Enhancements
-- Mandatory private networking (MySQL)
+- Mandatory private networking
 - Password length validation (≥24 chars)
 - Manual trigger only
 - Mandatory approval process
@@ -206,13 +230,18 @@ Code changes → Push to branch
 
 ### Terraform Init Fails
 - Check if Storage Account Name is correctly replaced
-- Confirm `use_oidc = true` is configured
+- Confirm OIDC is configured
 - Verify Service Connection configuration
 
 ### Pipeline Authentication Fails
 - Confirm OIDC Federated Credential is created
 - Check if ADO org/project name is correct
 - Verify Azure AD app ID permissions
+
+### Git Push Fails
+- Verify SSH key is added to Azure DevOps
+- Check SSH key permissions: `chmod 600 ~/.ssh/id_ed25519`
+- Test SSH connection: `ssh -T git@ssh.dev.azure.com`
 
 ### Prod Deployment Fails
 - Confirm `mysql_subnet_id` and `mysql_private_dns_zone_id` are configured
@@ -224,6 +253,7 @@ Code changes → Push to branch
 - [AzureRM Provider Documentation](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
 - [Azure DevOps OIDC Authentication](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/connect-to-azure?view=azure-devops)
 - [Workload Identity Federation](https://learn.microsoft.com/en-us/entra/identity/workload-identity-federation/)
+- [Azure DevOps SSH Keys](https://learn.microsoft.com/en-us/azure/devops/repos/git/use-ssh-keys-to-authenticate)
 
 ## 📄 License
 
